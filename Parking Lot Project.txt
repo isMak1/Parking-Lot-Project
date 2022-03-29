@@ -1,0 +1,129 @@
+//Parking Lot Project
+
+fun main() {
+    val parking = Parking()
+    while (true) {
+        val scanner = readLine()!!.split(" ")
+        when {
+            scanner[0].uppercase() == Command.CREATE.name -> parking.create(scanner[1].toInt())
+            scanner[0].uppercase() == Command.STATUS.name -> parking.status()
+            scanner[0].uppercase() == Command.REG_BY_COLOR.name -> parking.reg_by_color(scanner[1])
+            scanner[0].uppercase() == Command.SPOT_BY_COLOR.name -> parking.spot_by_color(scanner[1])
+            scanner[0].uppercase() == Command.SPOT_BY_REG.name -> parking.spot_by_reg(scanner[1])
+            scanner[0].uppercase() == Command.LEAVE.name -> parking.leave(scanner[1])
+            scanner[0].uppercase() == Command.PARK.name -> parking.park(scanner[1], scanner[2])
+            scanner[0].uppercase() == Command.EXIT.name -> break
+        }
+    }
+}
+
+data class Car(val number: String, val colour: String) {
+    override fun toString(): String = "$number $colour"
+}
+
+enum class Command {
+    PARK, LEAVE, EXIT, CREATE, STATUS, REG_BY_COLOR, SPOT_BY_COLOR, SPOT_BY_REG;
+}
+
+data class Parking(var parkingList: MutableList<Car?> = emptyList<Car?>().toMutableList()) {
+
+    fun leave(scanner1: String) {
+        if (scanner1.toInt() in 1..parkingList.size) {
+            parkingList[scanner1.toInt() - 1] = null
+            println("Spot ${scanner1.toInt()} is free.")
+        } else {
+            println("Sorry, a parking lot has not been created.")
+        }
+    }
+
+    fun park(scanner1: String, scanner2: String) {
+        when {
+            parkingList.isEmpty() -> println("Sorry, a parking lot has not been created.")
+            !parkingList.contains(null) -> println("Sorry, the parking lot is full.")
+            else -> {
+                val car = Car(scanner1, scanner2.lowercase())
+                for (i in parkingList.indices) {
+                    if (parkingList[i] == null) {
+                        parkingList[i] = car
+                        println("${car.colour} car parked in spot ${i + 1}.")
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    fun create(i: Int) {
+        parkingList.clear()
+        parkingList = arrayOfNulls<Car>(i).toMutableList()
+        println("Created a parking lot with $i spots.")
+    }
+
+    fun status() {
+        when {
+            parkingList.isEmpty() -> println("Sorry, a parking lot has not been created.")
+            parkingList.count { it == null } == parkingList.size -> println("Parking lot is empty.")
+            else -> {
+                for (i in parkingList.indices) {
+                    if (parkingList[i] != null) {
+                        println("${i + 1} ${parkingList[i]}")
+                    }
+                }
+            }
+        }
+    }
+
+    fun reg_by_color(scanner1: String) {
+        var allCars = ""
+        var exists = false
+        if (parkingList.isEmpty())
+            println("Sorry, a parking lot has not been created.")
+        else {
+            for (i in parkingList.indices) {
+                var car = parkingList[i]
+                if (car?.colour == scanner1.lowercase()) {
+                    allCars += "${car.number}, "
+                    exists = true
+                }
+            }
+            if (!exists) println("No cars with color $scanner1 were found.")
+            else println(allCars.substring(0, allCars.lastIndexOf(",")))
+        }
+    }
+
+    fun spot_by_color(scanner1: String) {
+        var parkingNumber = ""
+        var exists = false
+        if (parkingList.isEmpty())
+            println("Sorry, a parking lot has not been created.")
+        else {
+            for (i in parkingList.indices) {
+                var car = parkingList[i]
+                if (car?.colour == scanner1.lowercase()) {
+                    parkingNumber += "${i + 1}, "
+                    exists = true
+                }
+            }
+            if (!exists) println("No cars with color $scanner1 were found.")
+            else println(parkingNumber.substring(0, parkingNumber.lastIndexOf(",")))
+        }
+    }
+
+    fun spot_by_reg(scanner1: String) {
+        var parkingNumber = ""
+        var exists = false
+        if (parkingList.isEmpty())
+            println("Sorry, a parking lot has not been created.")
+        else {
+            for (i in parkingList.indices) {
+                var car = parkingList[i]
+                if (car?.number == scanner1) {
+                    parkingNumber += "${i + 1}, "
+                    exists = true
+                }
+            }
+            if (!exists) println("No cars with registration number $scanner1 were found.")
+            else println(parkingNumber.substring(0, parkingNumber.lastIndexOf(",")))
+        }
+    }
+}
